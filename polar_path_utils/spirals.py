@@ -10,11 +10,11 @@ def plan_spiral(
     wrap_angles: bool = False,
 ):
     """
-    Plan a path that linearly interpolates between two polar points; this will look like
-    a spiral if the points have different radii, and the arc of a circle if the points
-    have the same radii.
+    Plan a path that interpolates between two polar points linearly in joint space;
+    this will look like a spiral if the points have different radii, and the arc of a
+    circle if the points have the same radii.
 
-    The path is returned as a sequence of n_steps waypoints (points in polar coordinates)
+    The returned path is a sequence of n_steps waypoints (points in polar coordinates)
     spaced evenly in time along the path.
 
     By default, returns a path where the polar angle can range from -infinity to

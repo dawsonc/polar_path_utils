@@ -3,9 +3,42 @@ import matplotlib.pyplot as plt
 
 from polar_path_utils.lines import (
     plan_line,
-    danger_line,
 )
 from polar_path_utils.plotting_utils import fix_polar_points_for_plotting
+
+
+def test_plan_line():
+    # Plan a line that is nearly singular
+    duration = 5.0
+    timestep = 0.01
+    line_start_pt_polar = np.array([1.0, 0.0])
+    line_end_pt_polar = np.array([1.0, np.pi - 0.01])
+    radial_speed_limit = 1.0
+    angular_speed_limit = np.pi
+
+    t, pts, velocities = plan_line(
+        line_start_pt_polar,
+        line_end_pt_polar,
+        duration,
+        timestep,
+        radial_speed_limit,
+        angular_speed_limit,
+    )
+
+    # Times should be correct
+    assert np.isclose(t.min(), 0.0)
+    assert t.max() <= duration
+    assert np.allclose(np.diff(t).min(), timestep)
+    assert np.allclose(np.diff(t).max(), timestep)
+
+    # Make sure the waypoints are consistent
+    assert pts.shape == (t.shape[0], 2)
+    assert velocities.shape == (t.shape[0], 2)
+
+    # Make sure the velocity constraints are respected
+    tolerance = 1e-3
+    assert np.abs(velocities[:, 0]).max() <= radial_speed_limit + tolerance
+    assert np.abs(velocities[:, 1]).max() <= angular_speed_limit + tolerance
 
 
 def plan_line_no_singularity(duration: float, timestep: float):
@@ -22,15 +55,6 @@ def plan_line_close_to_singularity(
     line_end_pt_polar = np.array([1.0, np.pi - how_close])
 
     return plan_line(line_start_pt_polar, line_end_pt_polar, duration, timestep)
-
-
-def plan_danger_line(
-    duration: float, timestep: float, how_close: float = 0.01
-):
-    line_start_pt_polar = np.array([1.0, 0.0])
-    line_end_pt_polar = np.array([1.0, np.pi - how_close])
-
-    return danger_line(line_start_pt_polar, line_end_pt_polar, duration, timestep)
 
 
 def plan_line_singular(duration: float, timestep: float):
@@ -64,35 +88,5 @@ def plot_lines():
     plt.show()
 
 
-def plot_line_and_velocity():
-    duration = 5.0
-    timestep = 0.01
-
-    t, line_pts, line_v = plan_danger_line(duration, timestep, 0.05)
-    line_pts = fix_polar_points_for_plotting(line_pts)
-    plt.subplot(221, projection="polar")
-    plt.polar(line_pts[:, 1], line_pts[:, 0], label="No Diff IK")
-    plt.legend()
-    plt.subplot(222)
-    plt.plot(t, line_v[:, 0], label="Radial velocity (m/s)")
-    plt.plot(t, line_v[:, 1], label="Angular velocity (rad/s)")
-    plt.title("Joint velocities (No Diff IK)")
-    plt.legend()
-
-    t, line_pts, line_v = plan_line_close_to_singularity(duration, timestep, 0.05)
-    line_pts = fix_polar_points_for_plotting(line_pts)
-    plt.subplot(223, projection="polar")
-    plt.polar(line_pts[:, 1], line_pts[:, 0], label="Diff IK")
-    plt.legend()
-    plt.subplot(224)
-    plt.plot(t, line_v[:, 0], label="Radial velocity (m/s)")
-    plt.plot(t, line_v[:, 1], label="Angular velocity (rad/s)")
-    plt.title("Joint velocities (Diff IK)")
-    plt.legend()
-
-    plt.show()
-
-
 if __name__ == "__main__":
-    # plot_lines()
-    plot_line_and_velocity()
+    plot_lines()

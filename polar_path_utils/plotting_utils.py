@@ -16,8 +16,6 @@ def fix_polar_points_for_plotting(polar_pts):
     fixed_pts[:, 1] = np.where(
         fixed_pts[:, 0] < 0, fixed_pts[:, 1] + np.pi, fixed_pts[:, 1]
     )
-    fixed_pts[:, 0] = np.where(
-        fixed_pts[:, 0] < 0, -fixed_pts[:, 0], fixed_pts[:, 0]
-    )
+    fixed_pts[:, 0] = np.where(fixed_pts[:, 0] < 0, -fixed_pts[:, 0], fixed_pts[:, 0])
 
     return fixed_pts

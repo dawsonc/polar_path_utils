@@ -1,8 +1,14 @@
 """Functions for planning linear paths"""
+import sys
+
+import argparse
 import numpy as np
+import matplotlib.pyplot as plt
 
 from polar_path_utils.conversions import polar_to_cartesian
 from polar_path_utils.diff_ik import diff_ik
+from polar_path_utils.file_utils import save_path_to_csv
+from polar_path_utils.plotting_utils import fix_polar_points_for_plotting
 
 
 def plan_line(
@@ -77,3 +83,98 @@ def plan_line(
 
     # Return the constructed path
     return time_waypoints, position_waypoints, velocity_waypoints
+
+
+def lines_cli():
+    """Define a command-line interface for plotting lines"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--save_path",
+        type=str,
+        nargs="?",
+        default=None,
+        help=(
+            "Path to the file where you want to save the path. "
+            "If not provided, defaults to printing the path to stdout"
+        ),
+    )
+    parser.add_argument(
+        "--start_pt_polar",
+        type=float,
+        nargs=2,
+        required=True,
+        help="The radius and angle of the starting point",
+    )
+    parser.add_argument(
+        "--end_pt_polar",
+        type=float,
+        nargs=2,
+        required=True,
+        help="The radius and angle of the ending point",
+    )
+    parser.add_argument(
+        "--duration",
+        type=float,
+        required=True,
+        help="The duration of the path",
+    )
+    parser.add_argument(
+        "--timestep",
+        type=float,
+        nargs=1,
+        default=0.1,
+        help="The spacing in time between points on the path (default 0.1)",
+    )
+    parser.add_argument(
+        "--radial_speed_limit",
+        type=float,
+        nargs=1,
+        default=1.0,
+        help="The maximum speed of the radial stage (default 1.0)",
+    )
+    parser.add_argument(
+        "--angular_speed_limit",
+        type=float,
+        nargs=1,
+        default=np.pi,
+        help="The maximum speed of the angular stage (default pi)",
+    )
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="If set, plot the path",
+    )
+    parser.add_argument(
+        "--degrees",
+        action="store_true",
+        help="If set, convert all angles to degrees",
+    )
+    args = parser.parse_args()
+
+    # Plan the path
+    time_waypoints, position_waypoints, velocity_waypoints = plan_line(
+        np.array(args.start_pt_polar),
+        np.array(args.end_pt_polar),
+        args.duration,
+        args.timestep,
+        args.radial_speed_limit,
+        args.angular_speed_limit,
+    )
+
+    if args.plot:
+        position_waypoints = fix_polar_points_for_plotting(position_waypoints)
+        plt.polar(position_waypoints[:, 1], position_waypoints[:, 0])
+        plt.show()
+
+    # Save
+    file = sys.stdout.buffer
+    if args.save_path is not None:
+        file = args.save_path
+
+    save_path_to_csv(
+        file, time_waypoints, position_waypoints, velocity_waypoints, args.degrees
+    )
+
+
+if __name__ == "__main__":
+    lines_cli()

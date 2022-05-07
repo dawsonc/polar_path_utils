@@ -1,5 +1,12 @@
 """Functions for planning lissajous figures"""
+import sys
+
+import argparse
 import numpy as np
+import matplotlib.pyplot as plt
+
+from polar_path_utils.file_utils import save_path_to_csv
+from polar_path_utils.plotting_utils import fix_polar_points_for_plotting
 
 
 def plan_lissajous_polar(
@@ -68,3 +75,112 @@ def plan_lissajous_polar(
     velocity_waypoints[:, 1] = angular_freq * np.pi * np.cos(angular_freq * t + lag)
 
     return t, position_waypoints, velocity_waypoints
+
+
+def lissajous_cli():
+    """Define a command-line interface for plotting lines"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--save_path",
+        type=str,
+        nargs="?",
+        default=None,
+        help=(
+            "Path to the file where you want to save the path. "
+            "If not provided, defaults to printing the path to stdout"
+        ),
+    )
+    parser.add_argument(
+        "--radial_frequency",
+        type=float,
+        required=True,
+        help="The radial frequency of the figure",
+    )
+    parser.add_argument(
+        "--angular_frequency",
+        type=float,
+        required=True,
+        help="The angular frequency of the path",
+    )
+    parser.add_argument(
+        "--duration",
+        type=float,
+        required=True,
+        help="The duration of the path",
+    )
+    parser.add_argument(
+        "--timestep",
+        type=float,
+        nargs=1,
+        default=0.1,
+        help="The spacing in time between points on the path (default 0.1)",
+    )
+    parser.add_argument(
+        "--lag",
+        type=float,
+        nargs=1,
+        default=0.0,
+        help="The lag between the radial and angular variations (default 0.0)",
+    )
+    parser.add_argument(
+        "--max_radius",
+        type=float,
+        nargs=1,
+        default=1.0,
+        help="The maximum radius of the path (default 1.0)",
+    )
+    parser.add_argument(
+        "--radial_speed_limit",
+        type=float,
+        nargs=1,
+        default=1.0,
+        help="The maximum speed of the radial stage (default 1.0)",
+    )
+    parser.add_argument(
+        "--angular_speed_limit",
+        type=float,
+        nargs=1,
+        default=np.pi,
+        help="The maximum speed of the angular stage (default pi)",
+    )
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="If set, plot the path",
+    )
+    parser.add_argument(
+        "--degrees",
+        action="store_true",
+        help="If set, convert all angles to degrees",
+    )
+    args = parser.parse_args()
+
+    # Plan the path
+    time_waypoints, position_waypoints, velocity_waypoints = plan_lissajous_polar(
+        args.duration,
+        args.timestep,
+        args.radial_frequency,
+        args.angular_frequency,
+        args.lag,
+        args.max_radius,
+        args.radial_speed_limit,
+        args.angular_speed_limit,
+    )
+
+    if args.plot:
+        position_waypoints = fix_polar_points_for_plotting(position_waypoints)
+        plt.polar(position_waypoints[:, 1], position_waypoints[:, 0])
+        plt.show()
+
+    # Save
+    file = sys.stdout.buffer
+    if args.save_path is not None:
+        file = args.save_path
+
+    save_path_to_csv(
+        file, time_waypoints, position_waypoints, velocity_waypoints, args.degrees
+    )
+
+
+if __name__ == "__main__":
+    lissajous_cli()

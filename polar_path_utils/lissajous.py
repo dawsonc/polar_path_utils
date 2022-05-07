@@ -84,8 +84,12 @@ def plan_lissajous_polar(
 
     # Make velocity waypoints by analytically differentiating
     velocity_waypoints = np.zeros_like(position_waypoints)
-    velocity_waypoints[:, 0] = radial_freq * max_radius * np.cos(radial_freq * t)
-    velocity_waypoints[:, 1] = angular_freq * np.pi * np.cos(angular_freq * t + lag)
+    velocity_waypoints[:, 0] = (
+        radial_freq * max_radius * slowdown * np.cos(radial_freq * t * slowdown)
+    )
+    velocity_waypoints[:, 1] = (
+        angular_freq * np.pi * slowdown * np.cos(angular_freq * t * slowdown + lag)
+    )
 
     return t, position_waypoints, velocity_waypoints
 

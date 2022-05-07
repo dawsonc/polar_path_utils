@@ -91,7 +91,6 @@ def lines_cli():
     parser.add_argument(
         "--save_path",
         type=str,
-        nargs="?",
         default=None,
         help=(
             "Path to the file where you want to save the path. "
@@ -121,21 +120,18 @@ def lines_cli():
     parser.add_argument(
         "--timestep",
         type=float,
-        nargs=1,
         default=0.1,
         help="The spacing in time between points on the path (default 0.1)",
     )
     parser.add_argument(
         "--radial_speed_limit",
         type=float,
-        nargs=1,
         default=1.0,
         help="The maximum speed of the radial stage (default 1.0)",
     )
     parser.add_argument(
         "--angular_speed_limit",
         type=float,
-        nargs=1,
         default=np.pi,
         help="The maximum speed of the angular stage (default pi)",
     )
@@ -164,6 +160,13 @@ def lines_cli():
     if args.plot:
         position_waypoints = fix_polar_points_for_plotting(position_waypoints)
         plt.polar(position_waypoints[:, 1], position_waypoints[:, 0])
+        plt.polar(
+            position_waypoints[0, 1], position_waypoints[0, 0], "o", label="Start"
+        )
+        plt.polar(
+            position_waypoints[-1, 1], position_waypoints[-1, 0], "s", label="End"
+        )
+        plt.legend()
         plt.show()
 
     # Save

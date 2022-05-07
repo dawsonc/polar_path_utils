@@ -31,7 +31,7 @@ python polar_path_utils/spirals.py --plot --start_pt_polar 1.0 0.0 --end_pt_pola
 
 Plot a Lissajous figure:
 ```bash
-python polar_path_utils/lissajous.py --plot --duration 10 --radial_frequency 3 --angular_frequency 4
+python polar_path_utils/lissajous.py --plot --duration 100 --radial_frequency 3 --angular_frequency 4
 ```
 
 You can save any of these figures to a file using the `--save_path path/to/save.csv`; otherwise, the default is to print the path to `stdout`.

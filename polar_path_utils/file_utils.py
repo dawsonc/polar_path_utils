@@ -7,7 +7,7 @@ def save_path_to_csv(
     time_waypoints: np.ndarray,
     position_waypoints: np.ndarray,
     velocity_waypoints: np.ndarray,
-    degrees: bool = False
+    degrees: bool = False,
 ):
     """Save the given path to a CSV with the given name.
 

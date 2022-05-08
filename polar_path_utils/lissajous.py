@@ -188,13 +188,13 @@ def lissajous_cli():
     )
 
     if args.plot:
-        position_waypoints = fix_polar_points_for_plotting(position_waypoints)
-        plt.polar(position_waypoints[:, 1], position_waypoints[:, 0])
+        plotting_positions = fix_polar_points_for_plotting(position_waypoints)
+        plt.polar(plotting_positions[:, 1], plotting_positions[:, 0])
         plt.polar(
-            position_waypoints[0, 1], position_waypoints[0, 0], "o", label="Start"
+            plotting_positions[0, 1], plotting_positions[0, 0], "o", label="Start"
         )
         plt.polar(
-            position_waypoints[-1, 1], position_waypoints[-1, 0], "s", label="End"
+            plotting_positions[-1, 1], plotting_positions[-1, 0], "s", label="End"
         )
         plt.legend()
         plt.show()
